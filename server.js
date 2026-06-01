@@ -54,9 +54,11 @@ app.post('/api/chat', async (req, res) => {
       systemInstruction: systemPrompt,
     });
 
-    // Gemini uses 'model' instead of 'assistant', and requires alternating roles.
-    // Split history (everything except the last user message) and the new prompt.
-    const history = messages.slice(0, -1).map(msg => ({
+    // messages[0] is always the synthetic UI greeting (role: 'assistant').
+    // Gemini requires history to start with a 'user' turn, so we skip it.
+    // Slice from index 1, excluding the final message (sent separately).
+    const historyMessages = messages.slice(1, -1);
+    const history = historyMessages.map(msg => ({
       role: msg.role === 'assistant' ? 'model' : 'user',
       parts: [{ text: msg.content }],
     }));
